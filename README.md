@@ -85,9 +85,16 @@ python main.py  --data_name Beauty \
 We illustrate the performance of our MSTRec model comparing with eight state-of-the-art baselines on four datasets. The best performance methods are in boldface, and the second best methods are underlined. $^*$ denotes the improvement is significant with $p$-value $<$ 0.05.
 ![](images/main_results.jpg)
 
+# Hyperparameter Setting
+The key hyperparameter of our model is the scale $𝐾$, which represents the $𝐾$ selected periodic scales corresponding to the $𝐾$ most significant frequencies in the frequency domain of the user behavior sequence. 
+
+
 
 # Performance under Different Setting
-we use an alternative evaluation strategy to validate the performance our MSTRec. Specifically, we pair the ground-truth item with 99 randomly sampled negative items that the user has not interacted with. Then we evaluate our MSTRec model without using contrastive learning, and maintain the same scale $K$ for each dataset as in the main experiment. Finally, we select two Transformer-based models SASRec and FMLPRec as the representative baseline. 
+We also use an alternative evaluation strategy to validate the performance our MSTRec. Specifically, we pair the ground-truth item with 99 randomly sampled negative items that the user has not interacted with. Then we evaluate our MSTRec model without using contrastive learning, and maintain the same scale $K$ for each dataset as in the main experiment. Finally, we select two Transformer-based models SASRec and FMLPRec as the representative baseline. 
+<div align="center">
+  <img src=images/negsample_results.jpg>
+</div>
 
 
 # Acknowledgement 
