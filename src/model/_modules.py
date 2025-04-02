@@ -300,7 +300,7 @@ class MSTRecLayer(nn.Module):
     def __init__(self, args):
         super(MSTRecLayer, self).__init__()
         self.seq_len = args.max_seq_length
-        self.k = args.topK
+        self.k = args.scale_K
         self.multi_head_attention = MultiHeadAttention(args)
         
     def forward(self, x, attention_mask=None):
