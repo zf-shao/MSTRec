@@ -83,10 +83,11 @@ python main.py  --data_name Beauty \
 
 # Performance Comparison 
 We illustrate the performance of our MSTRec model comparing with eight state-of-the-art baselines on four datasets. The best performance methods are in boldface, and the second best methods are underlined. $^*$ denotes the improvement is significant with $p$-value $<$ 0.05.
+
 ![](images/main_results.jpg)
 
 # Hyperparameter Setting
-The key hyperparameter of our model is the scale $𝐾$, which represents the $𝐾$ selected periodic scales corresponding to the $𝐾$ most significant frequencies in the frequency domain of the user behavior sequence. The optimal performance is achieved at different scales $𝐾$ across the four datasets: $𝐾$=3 for Beauty, $𝐾$=5 for both Sports and Yelp, and $𝐾$=4 for ML-1M.
+The key hyperparameter of our model is the scale $𝐾$, which represents the $𝐾$ selected periodic scales corresponding to the $𝐾$ most significant frequencies in the frequency domain of the user behavior sequence. The optimal performance is achieved at different scales $𝐾$ across the four datasets: $𝐾$ =3 for Beauty, $𝐾$ =5 for both Sports and Yelp, and $𝐾$ =4 for ML-1M.
 
 <div align="center">
   <img src=images/hyperparameter_setting.jpg>
