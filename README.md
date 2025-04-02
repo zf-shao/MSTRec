@@ -12,10 +12,10 @@ MSTRec is a Transformer architecture, wherein each block starts with a multi-sca
 ![Framework](images/model.jpg)
 
 # Datasets
-We utilize four benchmark datasets to evaluate our MSTRec: .
+We utilize four benchmark datasets to evaluate our MSTRec, all of which can be downloaded in [Google Drive](https://drive.google.com/drive/folders/1Ir0nVoC_1flw3zW9N_ANck_XaGTvCNTa): 
 * Amazon Beauty, Sports are two representative sub-datasets gathered from Amazon dataset, which contains a series of product reviews crawled from Amazon.com. They are split by the top-level product categories on Amazon, we adopt the “Beauty”, “Sports and Outdoors (Sports)” categories.
 * ML-1M is a large and dense dataset with long item sequences, which collected from the movie recommendation site MovieLens. 
-* Yelp is a large business recommendation dataset. We treat the transaction records after $\text{January}$ $1 ^ {st}$, 2019.
+* Yelp is a large business recommendation dataset. We treat the transaction records after $\text{January}$ $1 ^ {st , 2019}$.
 
 
 
