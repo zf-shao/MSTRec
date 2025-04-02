@@ -3,19 +3,17 @@ import torch.nn as nn
 from model._abstract_model import SequentialRecModel
 from model._modules import LayerNorm, MSTRecBlock, TransformerEncoder
 
-class TSLAEncoder(nn.Module):
+class MSTEncoder(nn.Module):
     def __init__(self, args):
-        super(TSLAEncoder, self).__init__()
+        super(MSTEncoder, self).__init__()
         self.args = args
         self.blocks = []
         for i in range(args.num_hidden_layers):
-            self.blocks.append(TSLARecBlock(args, layer_num=i))
+            self.blocks.append(MSTRecBlock(args, layer_num=i))
         self.blocks = nn.ModuleList(self.blocks)
 
     def forward(self, hidden_states, attention_mask, output_all_encoded_layers=False):
-
         all_encoder_layers = [ hidden_states ]
-
         for layer_module in self.blocks:
             hidden_states = layer_module(hidden_states, attention_mask)
             if output_all_encoded_layers:
@@ -29,25 +27,18 @@ class TSLAEncoder(nn.Module):
 
 
 
-class TSLARecModel(SequentialRecModel):
+class MSTRecModel(SequentialRecModel):
     def __init__(self, args):
-        super(TSLARecModel, self).__init__(args)
+        super(MSTRecModel, self).__init__(args)
         self.args = args
         self.item_embeddings = nn.Embedding(args.item_size, args.hidden_size, padding_idx=0)
         self.position_embeddings = nn.Embedding(args.max_seq_length, args.hidden_size)
         self.LayerNorm = LayerNorm(args.hidden_size, eps=1e-12)
         self.dropout = nn.Dropout(args.hidden_dropout_prob)
         self.batch_size = args.batch_size
-        self.enable_ms = args.enable_ms    
+        self.item_encoder = MSTEncoder(args)
 
-        if self.enable_ms:  
-            # print("22222222222222222222222222222222222222222222222")
-            self.item_encoder = TSLAEncoder(args)
-        else:
-            # print("11111111111111111111111111111")
-            self.item_encoder = TransformerEncoder(args)
-
-        # arguments for FEARec
+        # arguments for MSTRec(same as DuoRec)
         self.aug_nce_fct = nn.CrossEntropyLoss()
         self.mask_default = self.mask_correlated_samples(batch_size=self.batch_size)
         self.tau = args.tau
@@ -55,10 +46,6 @@ class TSLARecModel(SequentialRecModel):
         self.sim = args.sim
         self.lmd_sem = args.lmd_sem
         self.lmd = args.lmd
-
-
-        #
-
 
         self.apply(self.init_weights)
 
