@@ -90,6 +90,7 @@ The key hyperparameter of our model is the scale $𝐾$, which represents the $�
 <div align="center">
   <img src=images/hyperparameter_setting.jpg>
 </div>
+
 Overall, different datasets exhibit varying sensitivity to the scale $𝐾$, and increasing scale $𝐾$ does not necessarily improve the model performance, which may be atttibuted to the differences in the periodic trends of user behavior characteristics across datasets.  
 
 
