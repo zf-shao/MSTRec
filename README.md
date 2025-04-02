@@ -27,5 +27,16 @@ conda activate MSTRec
 The required environment settings are detailed in the `requirements.txt` file.
 
 
-# Acknowledgement 
-This repository is based on [BSARec](https://github.com/yehjin-shin/BSARec).
+
+# Quick-Start
+
+## How to train MSTRec
+ ```
+python main.py  --data_name [DATASET] \
+                --lr [LEARNING_RATE] \
+                --scale_K [K] \ 
+                --num_attention_heads [N_HEADS] \
+                --train_name [LOG_NAME]
+ ```
+If you have downloaded the source codes, you can train the model just with data_name input.
+
