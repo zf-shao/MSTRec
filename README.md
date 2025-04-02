@@ -54,7 +54,7 @@ python main.py  --data_name Beauty \
  ```
 
 
-* Note that trained model (.pt) and train log file (.log) will saved in  `output` folder.
+* Note that trained model (.pt) and train log file (.log) will saved in  `src/output` folder.
 * The parameters of our model with contrastive learning remain the same as those of the baselines DuoRec and FEARec.
 
 
@@ -68,7 +68,7 @@ python main.py  --data_name [DATASET] \
                  --do_eval
  ```
 
-* Note that trained model (.pt) must be in `train_name`： name for log file and checkpoint file
+* Note that trained model (.pt) must be in `src/output`： name for log file and checkpoint file
 * `load_model`:  trained model name without .pt
 
 Example for Beauty
