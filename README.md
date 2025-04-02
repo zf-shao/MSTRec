@@ -83,7 +83,7 @@ python main.py  --data_name Beauty \
 
 # Results
 We illustrate the performance of our MSTRec model comparing with eight state-of-the-art baselines on four datasets. The best performance methods are in boldface, and the second best methods are underlined. $^*$ denotes the improvement is significant with $p$-value $<$ 0.05.
-![1](images/main_results.jpg)
+![](images/main_results.jpg)
 
 
 
