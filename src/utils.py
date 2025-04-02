@@ -98,7 +98,7 @@ def parse_args():
         parser.add_argument("--ssl", default='us_x', type=str)
         parser.add_argument("--sim", default='dot', type=str)
 
-        parser.add_argument("--topK", default=3, type=int)
+        parser.add_argument("--scale_K", default=3, type=int)
 
 
           
