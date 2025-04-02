@@ -86,15 +86,20 @@ We illustrate the performance of our MSTRec model comparing with eight state-of-
 ![](images/main_results.jpg)
 
 # Hyperparameter Setting
-The key hyperparameter of our model is the scale $𝐾$, which represents the $𝐾$ selected periodic scales corresponding to the $𝐾$ most significant frequencies in the frequency domain of the user behavior sequence. 
+The key hyperparameter of our model is the scale $𝐾$, which represents the $𝐾$ selected periodic scales corresponding to the $𝐾$ most significant frequencies in the frequency domain of the user behavior sequence. The optimal performance is achieved at different scales $𝐾$ across the four datasets: $𝐾$=3 for Beauty, $𝐾$=5 for both Sports and Yelp, and $𝐾$=4 for ML-1M.
+<div align="center">
+  <img src=images/hyperparameter_setting.jpg>
+</div>
+Overall, different datasets exhibit varying sensitivity to the scale $𝐾$, and increasing scale 𝐾 does not necessarily improve the model performance, which may be atttibuted to the differences in the periodic trends of user behavior characteristics across datasets.  
 
 
 
 # Performance under Different Setting
-We also use an alternative evaluation strategy to validate the performance our MSTRec. Specifically, we pair the ground-truth item with 99 randomly sampled negative items that the user has not interacted with. Then we evaluate our MSTRec model without using contrastive learning, and maintain the same scale $K$ for each dataset as in the main experiment. Finally, we select two Transformer-based models SASRec and FMLPRec as the representative baseline. 
+We also conduct experiments on four datasets under another evaluation strategy to further validate the performance of our MSTRec. Specifically, we pair the ground-truth item with 99 randomly sampled negative items that the user has not interacted with. We then evaluate our MSTRec model without using contrastive learning, maintaining the same scale $K$ as in the main experiment for each dataset. Finally, we select two Transformer-based models SASRec and FMLPRec, as representative baselines. 
 <div align="center">
   <img src=images/negsample_results.jpg>
 </div>
+
 
 
 # Acknowledgement 
