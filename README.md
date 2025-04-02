@@ -87,6 +87,7 @@ We illustrate the performance of our MSTRec model comparing with eight state-of-
 
 # Hyperparameter Setting
 The key hyperparameter of our model is the scale $𝐾$, which represents the $𝐾$ selected periodic scales corresponding to the $𝐾$ most significant frequencies in the frequency domain of the user behavior sequence. The optimal performance is achieved at different scales $𝐾$ across the four datasets: $𝐾$=3 for Beauty, $𝐾$=5 for both Sports and Yelp, and $𝐾$=4 for ML-1M.
+
 <div align="center">
   <img src=images/hyperparameter_setting.jpg>
 </div>
@@ -97,11 +98,12 @@ Overall, different datasets exhibit varying sensitivity to the scale $𝐾$, and
 
 # Performance under Different Setting
 We also conduct experiments on four datasets under another evaluation strategy to further validate the performance of our MSTRec. Specifically, we pair the ground-truth item with 99 randomly sampled negative items that the user has not interacted with. We then evaluate our MSTRec model without using contrastive learning, maintaining the same scale $K$ as in the main experiment for each dataset. Finally, we select two Transformer-based models SASRec and FMLPRec, as representative baselines. 
+
 <div align="center">
   <img src=images/negsample_results.jpg>
 </div>
 
-
+Experimental results demonstrate that our proposed multi-scale attention encoder effectively enhances the Transformer’s ability to capture key dynamics (periodic patterns).
 
 # Acknowledgement 
 This repository is based on [BSARec](https://github.com/yehjin-shin/BSARec).
