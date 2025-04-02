@@ -31,12 +31,51 @@ The required environment settings are detailed in the `requirements.txt` file.
 # Quick-Start
 
 ## How to train MSTRec
+If you have downloaded the source codes, you can just `run main.py` train the model：
  ```
 python main.py  --data_name [DATASET] \
-                --lr [LEARNING_RATE] \
-                --scale_K [K] \ 
-                --num_attention_heads [N_HEADS] \
-                --train_name [LOG_NAME]
+                 --lr [LEARNING_RATE] \
+                 --scale_K [K] \ 
+                 --num_attention_heads [N_HEADS] \
+                 --hidden_dropout_prob [DROPOUT] \
+                 --train_name [LOG_NAME]
  ```
-If you have downloaded the source codes, you can train the model just with data_name input.
+ `train_name`： name for log file and checkpoint file.
 
+
+Example for Beauty
+ ```
+python main.py  --data_name Beauty \
+                 --lr  0.001\
+                 --scale_K 3 \ 
+                 --num_attention_heads 2 \
+                 --hidden_dropout_prob 0.5 \
+                 --train_name MSTRec_Beauty
+ ```
+
+
+* Note that trained model (.pt) and train log file (.log) will saved in  `output` folder.
+* The parameters of our model with contrastive learning remain the same as those of the baselines DuoRec and FEARec.
+
+
+## How to test MSTRec
+If you have trained MSTRec on a certain dataset, you can test the trained model：
+ ```
+python main.py  --data_name [DATASET] \
+                 --scale_K [K] \ 
+                 --num_attention_heads [N_HEADS] \
+                 --load_model [TRAINED_MODEL_NAME] \
+                 --do_eval
+ ```
+
+* Note that trained model (.pt) must be in `train_name`： name for log file and checkpoint file
+* `load_model`:  trained model name without .pt
+
+Example for Beauty
+ ```
+python main.py  --data_name Beauty \
+                 --scale_K 3 \ 
+                 --num_attention_heads 2 \
+                 --load_model MSTRec_Beauty \
+                 --do_eval
+ ```
