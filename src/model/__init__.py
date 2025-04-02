@@ -6,7 +6,7 @@ from model.bert4rec import BERT4RecModel
 from model.fmlprec import FMLPRecModel
 from model.duorec import DuoRecModel
 from model.fearec import FEARecModel
-from model.tslarec import TSLARecModel
+from model.mstrec import MSTRecModel
 
 MODEL_DICT = {
     "bsarec": BSARecModel,
@@ -17,5 +17,5 @@ MODEL_DICT = {
     "fmlprec": FMLPRecModel,
     "duorec": DuoRecModel,
     "fearec": FEARecModel,
-    "tslarec": TSLARecModel,
+    "mstrec": MSTRecModel,
     }
