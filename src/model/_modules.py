@@ -77,72 +77,6 @@ class FeedForward(nn.Module):
 #######################
 ## Basic Transformer ##
 #######################
-class Lin_MultiHeadAttention(nn.Module):
-    def __init__(self, args):
-        super(Lin_MultiHeadAttention, self).__init__()
-        if args.hidden_size % args.num_attention_heads != 0:
-            raise ValueError(
-                "The hidden size (%d) is not a multiple of the number of attention "
-                "heads (%d)" % (args.hidden_size, args.num_attention_heads)
-            )
-        self.args = args
-        self.num_attention_heads = args.num_attention_heads
-        self.attention_head_size = int(args.hidden_size / args.num_attention_heads)
-        self.all_head_size = self.num_attention_heads * self.attention_head_size
-        self.sqrt_attention_head_size = math.sqrt(self.attention_head_size)
-
-        self.query = nn.Linear(args.hidden_size, self.all_head_size)
-        self.key = nn.Linear(args.hidden_size, self.all_head_size)
-        self.value = nn.Linear(args.hidden_size, self.all_head_size)
-
-        self.softmax = nn.Softmax(dim=-1)   #row-wise
-        self.softmax_col = nn.Softmax(dim=-2)   #column-wise
-
-        self.attn_dropout = nn.Dropout(args.attention_probs_dropout_prob)
-
-        self.scale = np.sqrt(args.hidden_size)
-        self.dense = nn.Linear(args.hidden_size, args.hidden_size)
-        self.LayerNorm = LayerNorm(args.hidden_size, eps=1e-12)
-        #self.LayerNorm = ContraNorm(args)
-        self.out_dropout = nn.Dropout(args.hidden_dropout_prob)
-
-    def transpose_for_scores(self, x):
-        new_x_shape = x.size()[:-1] + (
-            self.num_attention_heads,
-            self.attention_head_size,
-        )
-        x = x.view(*new_x_shape)
-        return x
-
-    def forward(self, input_tensor, attention_mask):
-        mixed_query_layer = self.query(input_tensor)
-        mixed_key_layer = self.key(input_tensor)
-        mixed_value_layer = self.value(input_tensor)
-
-        query_layer = self.transpose_for_scores(mixed_query_layer).permute(0, 2, 1, 3)
-        key_layer = self.transpose_for_scores(mixed_key_layer).permute(0, 2, 3, 1)
-        value_layer = self.transpose_for_scores(mixed_value_layer).permute(0, 2, 1, 3)
-
-        # Our Elu Norm Attention
-        elu = nn.ELU()
-        # relu = nn.ReLU()
-        elu_query = elu(query_layer)
-        elu_key = elu(key_layer)
-        query_norm_inverse = 1/torch.norm(elu_query, dim=3,p=2) #(L2 norm)
-        key_norm_inverse = 1/torch.norm(elu_key, dim=2,p=2)
-        normalized_query_layer = torch.einsum('mnij,mni->mnij',elu_query,query_norm_inverse)
-        normalized_key_layer = torch.einsum('mnij,mnj->mnij',elu_key,key_norm_inverse)
-        context_layer = torch.matmul(normalized_query_layer,torch.matmul(normalized_key_layer,value_layer))/ self.sqrt_attention_head_size
-
-        context_layer = context_layer.permute(0, 2, 1, 3).contiguous()
-        new_context_layer_shape = context_layer.size()[:-2] + (self.all_head_size,)
-        context_layer = context_layer.view(*new_context_layer_shape)
-        hidden_states = self.dense(context_layer)
-        hidden_states = self.out_dropout(hidden_states)
-        hidden_states = self.LayerNorm(hidden_states + input_tensor)
-
-        return hidden_states
-
 class MultiHeadAttention(nn.Module):
     def __init__(self, args):
         super(MultiHeadAttention, self).__init__()
@@ -196,11 +130,11 @@ class MultiHeadAttention(nn.Module):
         else:
             attention_scores = attention_scores + attention_mask
 
-        # Normalize the attent      ion scores to probabilities.
+        # Normalize the attention scores to probabilities.
         attention_probs = self.softmax(attention_scores)
         # print(attention_probs.shape)    #[256,2,50,50]
 
-        # #保存为npy
+        # save as npy
         # attention_matrix = attention_probs.cpu().detach().numpy()
         # np.save('./attention_matrix.npy',attention_matrix)
 
@@ -226,7 +160,6 @@ class TransformerBlock(nn.Module):
 
     def forward(self, hidden_states, attention_mask):
         layer_output = self.layer(hidden_states, attention_mask)
-        # print("********************")
         feedforward_output = self.feed_forward(layer_output)
         return feedforward_output
 
@@ -312,7 +245,6 @@ class BSARecBlock(nn.Module):
 #######################
 ######  FMLP-Rec ######
 #######################
-
 class FMLPRecLayer(nn.Module):
     def __init__(self, args):
         super(FMLPRecLayer, self).__init__()
@@ -351,124 +283,7 @@ class FMLPRecBlock(nn.Module):
 
 
 #######################
-######  AdaMCT ######
-#######################
-
-
-class AdaMCTLayer(nn.Module):
-    def __init__(self, args):
-        super(AdaMCTLayer, self).__init__()
-        self.LayerNorm = LayerNorm(args.hidden_size, eps=1e-12)
-        self.out_dropout = nn.Dropout(args.hidden_dropout_prob)
-        self.multi_head_attention = MultiHeadAttention(args)
-        self.local_conv = LocalConv(args)
-        seq_len = args.max_seq_length
-        reduction_ratio = args.reduction_ratio
-
-        self.global_seatt = SqueezeExcitationAttention(seq_len, reduction_ratio)
-        self.local_seatt = SqueezeExcitationAttention(seq_len, reduction_ratio)
-
-        self.adaptive_mixture_units = AdaptiveMixtureUnits(args)
-
-    def forward(self, hidden_states, attention_mask):
-        global_output = self.multi_head_attention(hidden_states, attention_mask)
-        global_output = self.global_seatt(global_output)
-
-        local_output = self.local_conv(hidden_states)
-        local_output = self.local_seatt(local_output)
-
-        layer_output = self.adaptive_mixture_units(hidden_states, global_output, local_output)
-        return layer_output
-
-
-class AdaptiveMixtureUnits(nn.Module):
-    def __init__(self, args):
-        super(AdaptiveMixtureUnits, self).__init__()
-        self.linear = nn.Linear(args.hidden_size, 1)
-        self.adaptive_act_fn = torch.sigmoid
-        self.linear_out = nn.Linear(args.hidden_size, args.hidden_size)
-        self.LayerNorm = LayerNorm(args.hidden_size, eps=1e-12)
-        self.dropout = nn.Dropout(args.hidden_dropout_prob)
-
-    def forward(self, input_tensor, global_output, local_output):
-        input_tensor_avg = torch.mean(input_tensor, dim=1)  # [B, D]
-        ada_score_alpha = self.adaptive_act_fn(self.linear(input_tensor_avg)).unsqueeze(-1)  # [B, 1, 1]
-        ada_score_beta = 1 - ada_score_alpha
-
-        mixture_output = torch.mul(global_output, ada_score_beta) + torch.mul(local_output,
-                                                                              ada_score_alpha)  # [B, N, D]
-
-        output = self.LayerNorm(self.dropout(self.linear_out(mixture_output)) + input_tensor)  # [B, N, D]
-        return output
-
-
-class SqueezeExcitationAttention(nn.Module):
-    def __init__(self, seq_len, reduction_ratio):
-        super(SqueezeExcitationAttention, self).__init__()
-        self.dense_1 = nn.Linear(seq_len, seq_len // reduction_ratio)
-        self.squeeze_act_fn = F.relu
-
-        self.dense_2 = nn.Linear(seq_len // reduction_ratio, seq_len)
-        self.excitation_act_fn = torch.sigmoid
-
-    def forward(self, input_tensor):
-        input_tensor_avg = torch.mean(input_tensor, dim=-1, keepdim=True)  # [B, N, 1]
-
-        hidden_states = self.dense_1(input_tensor_avg.permute(0, 2, 1))  # [B, 1, N] -> [B, 1, N/r]
-        hidden_states = self.squeeze_act_fn(hidden_states)
-
-        hidden_states = self.dense_2(hidden_states)  # [B, 1, N/r] -> [B, 1, N]
-        att_score = self.excitation_act_fn(hidden_states)  # sigmoid []
-
-        # reweight
-        input_tensor = torch.mul(input_tensor, att_score.permute(0, 2, 1))  # [B, N, D]
-        return input_tensor
-
-
-class LocalConv(nn.Module):
-    def __init__(self, args):
-        super(LocalConv, self).__init__()
-        kernel_size = args.kernel_size
-        self.padding = (kernel_size - 1) // 2  # 3-1=2, 2//2=1
-        self.conv_1_3 = nn.Conv1d(args.hidden_size, args.hidden_size, kernel_size, stride=1, padding=self.padding)
-        self.conv_act_fn = self.get_hidden_act(args.hidden_act)
-        self.LayerNorm = LayerNorm(args.hidden_size, eps=1e-12)
-
-        # self.dropout = nn.Dropout(hidden_dropout_prob)
-
-    def get_hidden_act(self, act):
-        ACT2FN = {
-            "gelu": self.gelu,
-            "relu": F.relu,
-            "swish": self.swish,
-            "tanh": torch.tanh,
-            "sigmoid": torch.sigmoid,
-        }
-        return ACT2FN[act]
-
-    def gelu(self, x):
-        """Implementation of the gelu activation function.
-
-        For information: OpenAI GPT's gelu is slightly different (and gives slightly different results)::
-
-            0.5 * x * (1 + torch.tanh(math.sqrt(2 / math.pi) * (x + 0.044715 * torch.pow(x, 3))))
-
-        Also see https://arxiv.org/abs/1606.08415
-        """
-        return x * 0.5 * (1.0 + torch.erf(x / math.sqrt(2.0)))
-
-    def swish(self, x):
-        return x * torch.sigmoid(x)
-
-    def forward(self, input_tensor):
-        hidden_states = self.conv_1_3(input_tensor.permute(0, 2, 1))
-        hidden_states = self.LayerNorm(hidden_states.permute(0, 2, 1))
-        hidden_states = self.conv_act_fn(hidden_states)
-        return hidden_states
-
-
-#######################
-######  TSLARec  #######
+######  MSTRec  #######
 #######################
 def FFT_for_Period(x, k=2):
     # [B, T, C]
@@ -481,43 +296,33 @@ def FFT_for_Period(x, k=2):
     period = x.shape[1] // top_list
     return period, abs(xf).mean(-1)[:, top_list]
 
-class TSLARecLayer(nn.Module):
+class MSTRecLayer(nn.Module):
     def __init__(self, args):
-        super(TSLARecLayer, self).__init__()
+        super(MSTRecLayer, self).__init__()
         self.seq_len = args.max_seq_length
         self.k = args.topK
-
         self.multi_head_attention = MultiHeadAttention(args)
-        # self.feed_forward = FeedForward(hidden_size, intermediate_size, hidden_dropout_prob, hidden_act, layer_norm_eps)
         
     def forward(self, x, attention_mask=None):
-        B, T, N = x.size()  #[8, 50, 64]
-        # print("******************************************")
-        # x = self.filter(x)
-        period_list, period_weight = FFT_for_Period(x, self.k)  #5, [8,5]
-        # print(period_list)
+        B, T, N = x.size()  
+        period_list, period_weight = FFT_for_Period(x, self.k)  
         res = []
         for i in range(self.k):
-            period = period_list[i] #[50,25,16]
-
+            period = period_list[i] 
             # padding
             if (self.seq_len) % period != 0:
                 length = ( (self.seq_len// period) + 1 ) * period
                 padding = torch.zeros([x.shape[0], (length - self.seq_len), x.shape[2]]).to(x.device)
                 out = torch.cat([x, padding], dim=1)
-
             else:
                 length = self.seq_len
                 out = x
-
             # reshape
             out = out.reshape(B, length // period, period, N)
-
             #for Mul-attetion
             out = out.reshape(-1 , period , N)
             out = self.multi_head_attention(out, None)
 
-            
             # reshape back
             out = out.reshape(B, -1 , period , N).reshape(B ,-1 ,N)
             res.append(out[:, :self.seq_len , :])
@@ -532,13 +337,12 @@ class TSLARecLayer(nn.Module):
             1).unsqueeze(1).repeat(1, T, N, 1)
 
         res = torch.sum(res * period_weight, -1)
-        # res = self.feed_forward(res)
         return res
 
-class TSLARecBlock(nn.Module):
+class MSTRecBlock(nn.Module):
     def __init__(self, args, layer_num):
-        super(TSLARecBlock, self).__init__()
-        self.layer = TSLARecLayer(args)
+        super(MSTRecBlock, self).__init__()
+        self.layer = MSTRecLayer(args)
         self.feed_forward = FeedForward(args)
 
     def forward(self, hidden_states, attention_mask):
