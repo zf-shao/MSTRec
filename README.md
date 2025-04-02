@@ -79,3 +79,6 @@ python main.py  --data_name Beauty \
                  --load_model MSTRec_Beauty \
                  --do_eval
  ```
+
+# Acknowledgement 
+This repository is based on [BSARec](https://github.com/yehjin-shin/BSARec).
