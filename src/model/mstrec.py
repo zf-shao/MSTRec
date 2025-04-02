@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from model._abstract_model import SequentialRecModel
-from model._modules import LayerNorm, TSLARecBlock, TransformerEncoder
+from model._modules import LayerNorm, MSTRecBlock, TransformerEncoder
 
 class TSLAEncoder(nn.Module):
     def __init__(self, args):
