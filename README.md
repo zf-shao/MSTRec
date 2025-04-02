@@ -105,5 +105,4 @@ We also conduct experiments on four datasets under another evaluation strategy t
 
 Experimental results demonstrate that our proposed multi-scale attention encoder effectively enhances the Transformer’s ability to capture key dynamics (periodic patterns).
 
-# Acknowledgement 
-This repository is based on [BSARec](https://github.com/yehjin-shin/BSARec).
+
