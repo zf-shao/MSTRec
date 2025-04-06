@@ -1,8 +1,7 @@
 # MSTRec
 
 
-This is the source code for our Paper 'Contrastive Enhanced Multi-Scale Transformer for Sequential
-Recommendation'
+This is the source code for our Paper 'Contrastive Enhanced Multi-Scale Transformer for Sequential Recommendation'
 
 
 
@@ -85,6 +84,10 @@ python main.py  --data_name Beauty \
 We illustrate the performance of our MSTRec model comparing with eight state-of-the-art baselines on four datasets. The best performance methods are in boldface, and the second best methods are underlined. $^*$ denotes the improvement is significant with $p$ -value < 0.05.
 
 ![](images/main_results.jpg)
+
+We search the optimal hyperparameters for all baselines based on their recommended hyperparameters. It is worth noting that the results  reported in the paper BSARec on the benchmark datasets are generally superior to those of our MSTRec. This can be attributed to the following reasons: (1) BSARec reports the best performance achieved on each dataset, whereas we report the average performance over five runs with different random seeds; and (2) the discrepancies may also stem from differences in experimental environments.
+
+
 
 # Hyperparameter Setting
 The key hyperparameter of our model is the scale $𝐾$, which represents the $𝐾$ selected periodic scales corresponding to the $𝐾$ most significant frequencies in the frequency domain of the user behavior sequence. The optimal performance is achieved at different scales $𝐾$ across the four datasets: $𝐾$ = 3 for Beauty, $𝐾$ = 5 for both Sports and Yelp, and $𝐾$ = 4 for ML-1M.
