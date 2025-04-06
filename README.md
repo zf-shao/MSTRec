@@ -85,7 +85,7 @@ We illustrate the performance of our MSTRec model comparing with eight state-of-
 
 ![](images/main_results.jpg)
 
-We search the optimal hyperparameters for all baselines based on their recommended hyperparameters. It is worth noting that the results  reported in the paper BSARec on the benchmark datasets are generally superior to those of our MSTRec. This can be attributed to the following reasons: (1) BSARec reports the best performance achieved on each dataset, whereas we report the average performance over five runs with different random seeds; and (2) the discrepancies may also stem from differences in experimental environments.
+We search the optimal hyperparameters for all baselines based on their recommended hyperparameters. It is worth noting that the results  reported in the paper BSARec on the benchmark datasets are generally superior to those of our MSTRec. This can be attributed to the following reasons: (1) BSARec reports the best performance achieved on each dataset, whereas we perform 5 times experiments with different random seeds and report the average results; and (2) the discrepancies may also stem from differences in experimental environments.
 
 
 
