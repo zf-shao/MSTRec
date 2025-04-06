@@ -55,7 +55,7 @@ python main.py  --data_name Beauty \
 
 
 * Note that trained model (.pt) and train log file (.log) will saved in  `src/output` folder.
-* The parameters of our model with contrastive learning remain the same as those of the baselines DuoRec and FEARec.
+* The parameters of our model with contrastive learning remain the same as those of the baselines DuoRec.
 
 
 ## How to test MSTRec
