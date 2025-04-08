@@ -107,6 +107,6 @@ We also conduct experiments on four datasets under another evaluation strategy t
   <img src=images/negsample_results.jpg>
 </div>
 
-Experimental results demonstrate that our proposed multi-scale attention encoder effectively enhances the Transformer’s ability to capture key dynamics (periodic patterns).
+Experimental results demonstrate that our proposed multi-scale attention encoder effectively enhances the Transformer’s ability to model complex temporal patterns with periodic dynamics.
 
 
