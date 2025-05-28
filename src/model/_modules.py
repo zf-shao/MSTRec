@@ -25,7 +25,9 @@ class LayerNorm(nn.Module):
 class FeedForward(nn.Module):
     def __init__(self, args):
         super(FeedForward, self).__init__()
-
+        """
+        The hidden_dropout_prod is set in {0.1, 0.5}
+        """
         hidden_size = args.hidden_size
         inner_size = 4 * args.hidden_size
 
@@ -85,6 +87,9 @@ class MultiHeadAttention(nn.Module):
                 "The hidden size (%d) is not a multiple of the number of attention "
                 "heads (%d)" % (args.hidden_size, args.num_attention_heads))
         self.args = args
+        """
+        The number of num_attention_heads is in {1,2,4}
+        """
         self.num_attention_heads = args.num_attention_heads
         self.attention_head_size = int(args.hidden_size / args.num_attention_heads)
         self.all_head_size = self.num_attention_heads * self.attention_head_size
@@ -169,7 +174,9 @@ class TransformerEncoder(nn.Module):
         super(TransformerEncoder, self).__init__()
         self.args = args
         block = TransformerBlock(args)  # self attention
-
+        """
+        The num_hidden_layers is set to 2
+        """
         self.blocks = nn.ModuleList([copy.deepcopy(block) for _ in range(args.num_hidden_layers)])
 
     def forward(self, hidden_states, attention_mask, output_all_encoded_layers=False):
@@ -194,7 +201,10 @@ class FrequencyLayer(nn.Module):
         super(FrequencyLayer, self).__init__()
         self.out_dropout = nn.Dropout(args.hidden_dropout_prob)
         self.LayerNorm = LayerNorm(args.hidden_size, eps=1e-12)
-        self.c = args.c // 2 + 1    #根据filter layer的size自己设置固定参数的filter然后替换，前1/2为1后1/2为0是低通，前1/2为0后1/2为1是高通，中间1/3为0是带阻
+        """
+        The number of args.c is set in {3,5,9}
+        """
+        self.c = args.c // 2 + 1    
         self.sqrt_beta = nn.Parameter(torch.randn(1, 1, args.hidden_size))
 
     def forward(self, input_tensor):
@@ -220,6 +230,9 @@ class BSARecLayer(nn.Module):
         self.args = args
         self.filter_layer = FrequencyLayer(args)
         self.attention_layer = MultiHeadAttention(args)
+        """
+        The args.alpha is set in {0.3,0.7,0.9}
+        """
         self.alpha = args.alpha
 
     def forward(self, input_tensor, attention_mask):
@@ -286,7 +299,6 @@ class FMLPRecBlock(nn.Module):
 ######  MSTRec  #######
 #######################
 def FFT_for_Period(x, k=2):
-    # [B, T, C]
     xf = torch.fft.rfft(x, dim=1)
     # find period by amplitudes
     frequency_list = abs(xf).mean(0).mean(-1)
@@ -305,6 +317,12 @@ class MSTRecLayer(nn.Module):
         
     def forward(self, x, attention_mask=None):
         B, T, N = x.size()  
+        """
+        The scale K is set in {3, 4, 5};
+        3 for Beauty;
+        4 for ML-1M;
+        5 for Sports and Yelp
+        """
         period_list, period_weight = FFT_for_Period(x, self.k)  
         res = []
         for i in range(self.k):
@@ -363,7 +381,13 @@ class FEARecLayer(nn.Module):
         self.out_dropout = nn.Dropout(args.hidden_dropout_prob)
         self.max_item_list_length = args.max_seq_length
         self.dual_domain = True
-
+        
+        """
+        The args.global_ratio is set in {0.6,0.8,1}
+        0.6 for Sports;
+        0.8 for Beauty and Clothing
+        1 for ML-1M
+        """
         self.global_ratio = args.global_ratio
         self.n_layers = args.num_hidden_layers
 
@@ -390,6 +414,8 @@ class FEARecLayer(nn.Module):
             print("{}>{}:{}".format(self.global_ratio, 1 / self.n_layers, self.global_ratio > (1 / self.n_layers)))
             self.filter_mixer = 'L'
         self.slide_step = ((self.max_item_list_length // 2 + 1) * (1 - self.global_ratio)) // (self.n_layers - 1)
+
+
         self.local_ratio = 1 / self.n_layers
         self.filter_size = self.local_ratio * (self.max_item_list_length // 2 + 1)
 
@@ -423,6 +449,9 @@ class FEARecLayer(nn.Module):
         print('modes_k={}, index_k={}'.format(len(self.k_index), self.k_index))
         print('modes_v={}, index_v={}'.format(len(self.v_index), self.v_index))
 
+        """
+        The args.spatial_ratio is set in {0.1,0.3,0.5,0.7,0.9}
+        """
         self.spatial_ratio = args.spatial_ratio
 
     def time_delay_agg_training(self, values, corr):
