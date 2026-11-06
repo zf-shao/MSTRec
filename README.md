@@ -28,7 +28,6 @@ The required environment settings are detailed in the `requirements.txt` file.
 
 
 # Quick-Start
-
 ## How to train MSTRec
 If you have downloaded the source codes, you can just `run main.py` train the model：
  ```
